@@ -42,8 +42,6 @@ def Box():
         new_bx = size - (ax+(s-1)*step_pix_B)-bw
         new_by = size - (ay+(s-1)*step_pix_B)-bh
 
-        # back_tmp = cv2.imread('tmp/back.jpg')
-        # back = cv2.resize(back_tmp, (size, size))
         back = copy.copy(back_tmp)
 
         cx = new_bx
@@ -82,9 +80,9 @@ def Box():
         if y_line[s]>50:
             color = (0,0,255)
             # c_color = []
-        # cv2.circle(back_plt, (int(size_plt / (size / step_pix) * s), int(size_plt - size_c / 100)), 1, (0, 0, 0), 1)
+        
         cv2.line(back_plt,(x_line[s-1], size_plt-y_line[s-1]),(x_line[s],size_plt-y_line[s]),color,3 )
-        # back_plt2 = np.rot90(np.rot90(back_plt))
+
         cv2.putText(back_plt,'IOU',(0,50),cv2.FONT_HERSHEY_PLAIN,2,color,1)
         back[slice(size - size_plt, size), slice(0, int(size * 5 / 12))] = back_plt[:, slice(0, int(size * 5 / 12))]
         pil_im = Image.fromarray(back)
@@ -92,8 +90,6 @@ def Box():
         draw = ImageDraw.Draw(pil_im)
         draw.text((0, int(size*2/3+30)), "红色区域：触发ＮＭＳ", (0, 0, 255), font=font)
         back = np.array(pil_im)
-
-        # cv2.putText(back, '红色线：触发ＮＭＳ', (0, int(size/2)), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 1)
 
         if ch>0 and cw > 0:
             box_A = cv2.rectangle(back,
@@ -128,28 +124,6 @@ def Box():
             cv2.putText(back, 'B', (new_bx, new_by), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 1)
             # write(back, 1)
 
-        # size_a = aw * ah
-        # size_b = bw * bh
-        # if cw<0 or ch<0:
-        #     cw = 0
-        #     min_size = 0
-        # else:
-        #     min_size = min(size_a,size_b)
-        #
-        # size_c = cw*ch
-        # IOU = size_c/min(size_a,size_b)
-        # x.append(s)
-        # y.append(size_c/10000)
-        #
-        # x_line.append(int(size/(size/step_pix) *s ))
-        # y_line.append(int(size_c/100))
-        #
-        # # cv2.circle(back_plt, (int(size_plt / (size / step_pix) * s), int(size_plt - size_c / 100)), 1, (0, 0, 0), 1)
-        # cv2.line(back_plt,(x_line[s-1], size_plt-y_line[s-1]),(x_line[s],size_plt-y_line[s]),(255,255,255),3 )
-        # # back_plt2 = np.rot90(np.rot90(back_plt))
-        # cv2.putText(back_plt,'IOU',(0,50),cv2.FONT_HERSHEY_PLAIN,2,(255,255,255),1)
-        # back[slice(size - size_plt, size), slice(0, int(size * 5 / 12))] = back_plt[:, slice(0, int(size * 5 / 12))]
-
         write(back_plt, 4)
         # cv2.putText(back_plt,'IOU')
 
@@ -158,9 +132,6 @@ def Box():
         write(back,1)
         videowriter.write(back)
         print(s)
-
-
-        # write(back_plt,10)
 
     plt.plot(x,y)
     plt.ylabel('IOU')
