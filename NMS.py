@@ -23,9 +23,9 @@ def Box():
     aw,ah = 400,400
     bw,bh = 100,100
 
-    fps = 1
-    video_size = (size, size)
-    videowriter = cv2.VideoWriter("tmp/a.avi", cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), fps, video_size)
+    fps = 10
+    video_size = (size, size+size_plt)
+    videowriter = cv2.VideoWriter("tmp/a.avi", cv2.VideoWriter_fourcc(*'mp4v'), fps, video_size)
 
     back_tmp = np.ones((size,size),dtype='uint8')*255
     write(back_tmp,'back')
@@ -115,7 +115,7 @@ def Box():
         write(nms_line,'m_'+str(s))
 
         cv2.putText(back_plt,'IOU_WITH_NMS',     (0,50),cv2.FONT_HERSHEY_PLAIN,3,color,2)
-        cv2.putText(back_plt_no_NMS,'IOU_NO_NMS',(0,50),cv2.FONT_HERSHEY_PLAIN,3,color,2)
+        cv2.putText(back_plt_no_NMS,'IOU_NO_NMS',(0,50),cv2.FONT_HERSHEY_PLAIN,3,color_no_NMS,2)
         # back[slice(size - size_plt, size), slice(0, int(size * 5 / 12))] = back_plt[:, slice(0, int(size * 5 / 12))]
 
         back = np.append(back,nms_line,axis=0)
