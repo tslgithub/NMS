@@ -25,7 +25,7 @@ def Box():
 
     fps = 10
     video_size = (size, size+size_plt)
-    videowriter = cv2.VideoWriter("tmp/a.avi", cv2.VideoWriter_fourcc(*'mp4v'), fps, video_size)
+    videowriter = cv2.VideoWriter("./NMS.avi", cv2.VideoWriter_fourcc(*'mp4v'), fps, video_size)
 
     back_tmp = np.ones((size,size),dtype='uint8')*255
     write(back_tmp,'back')
@@ -114,15 +114,26 @@ def Box():
         # back.shape[::-1], nms_line.shape[::-1]
         write(nms_line,'m_'+str(s))
 
-        cv2.putText(back_plt,'IOU_WITH_NMS',     (0,50),cv2.FONT_HERSHEY_PLAIN,3,color,2)
-        cv2.putText(back_plt_no_NMS,'IOU_NO_NMS',(0,50),cv2.FONT_HERSHEY_PLAIN,3,color_no_NMS,2)
+        back_plt = Image.fromarray(back_plt)
+        font = ImageFont.truetype("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc", 50, encoding="utf-8")
+        draw = ImageDraw.Draw(back_plt)
+        draw.text((10, 50), "改进后IOU的变化", color, font=font)
+        back_plt = np.array(back_plt)
+
+        back_plt_no_NMS = Image.fromarray(back_plt_no_NMS)
+        font = ImageFont.truetype("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc", 50, encoding="utf-8")
+        draw = ImageDraw.Draw(back_plt_no_NMS)
+        draw.text((10, 50), "改进前IOU的变化", color_no_NMS, font=font)
+        back_plt_no_NMS = np.array(back_plt_no_NMS)
+
+        # cv2.putText(back_plt,'IOU_WITH_NMS',     (0,50),cv2.FONT_HERSHEY_PLAIN,3,color,2)
+        # cv2.putText(back_plt_no_NMS,'IOU_NO_NMS',(0,50),cv2.FONT_HERSHEY_PLAIN,3,color_no_NMS,2)
         # back[slice(size - size_plt, size), slice(0, int(size * 5 / 12))] = back_plt[:, slice(0, int(size * 5 / 12))]
 
         back = np.append(back,nms_line,axis=0)
 
         pil_im = Image.fromarray(back)
         font = ImageFont.truetype("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc", 50, encoding="utf-8")
-        # font = ImageFont.truetype("simhei.ttf", 20, encoding="utf-8")
         draw = ImageDraw.Draw(pil_im)
         draw.text((0, size-100), "红色区域：触发ＮＭＳ", (0, 0, 255), font=font)
         back = np.array(pil_im)
