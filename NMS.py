@@ -117,13 +117,13 @@ def Box():
         back_plt = Image.fromarray(back_plt)
         font = ImageFont.truetype("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc", 50, encoding="utf-8")
         draw = ImageDraw.Draw(back_plt)
-        draw.text((10, 50), "改进后IOU的变化", color, font=font)
+        draw.text((20, 50), "改进后IOU的变化", color, font=font)
         back_plt = np.array(back_plt)
 
         back_plt_no_NMS = Image.fromarray(back_plt_no_NMS)
         font = ImageFont.truetype("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc", 50, encoding="utf-8")
         draw = ImageDraw.Draw(back_plt_no_NMS)
-        draw.text((10, 50), "改进前IOU的变化", color_no_NMS, font=font)
+        draw.text((20, 50), "改进前IOU的变化", color_no_NMS, font=font)
         back_plt_no_NMS = np.array(back_plt_no_NMS)
 
         # cv2.putText(back_plt,'IOU_WITH_NMS',     (0,50),cv2.FONT_HERSHEY_PLAIN,3,color,2)
