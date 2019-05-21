@@ -16,11 +16,11 @@ def write(img,name):
 def Box():
 
     ax,ay = 0,0
-    step_pix = 10
-    step_pix_B = 20
-    size = 500
-    size_plt = 100
-    aw,ah = 200,200
+    step_pix = 5
+    step_pix_B = 10
+    size = 1000
+    size_plt = 500
+    aw,ah = 400,400
     bw,bh = 100,100
 
     fps = 1
@@ -32,8 +32,10 @@ def Box():
     back_tmp = cv2.imread('tmp/back.jpg')
     back_tmp = cv2.resize(back_tmp,(size,size))
     x,y,x_line,y_line =[], [],[0],[0]
+    y_line2 = [0]
 
     back_plt = cv2.resize(back_tmp,(size,size_plt))
+    back_plt_no_NMS = cv2.resize(back_tmp,(size,size_plt))
     # back_plt = cv2.threshold(back_plt,127,255,cv2.THRESH_BINARY_INV)[-1]
     for s in range(1,int(size/step_pix)):
         new_ax = ax+(s-1)*step_pix
@@ -59,7 +61,6 @@ def Box():
             cw = new_bx+bw-new_ax
             ch = new_by+bh-new_ay
 
-
         size_a = aw * ah
         size_b = bw * bh
         if cw<0 or ch<0:
@@ -68,27 +69,62 @@ def Box():
         else:
             min_size = min(size_a,size_b)
 
-        size_c = cw*ch
-        IOU = size_c/min(size_a,size_b)
-        x.append(s)
-        y.append(size_c/10000)
+        # size_c = cw*ch
+        # IOU = size_c/min(size_a,size_b)
+        # IOU2 = size_c/(size_a+size_b-size_c)
+        # print(IOU,IOU2)
+        # x.append(s)
+        # y.append(size_c/10000)
+        #
+        # x_line.append(step_pix *s )
+        # y_line.append(int(size_c/100))
+        #
+        # color = (0,0,0)
+        # if y_line[s]>50:
+        #     color = (0,0,255)
+        #     # c_color = []
+        #
+        # cv2.line(back_plt,       (x_line[s-1], size_plt-y_line[s-1]),(x_line[s],size_plt-y_line[s]),color,5 )
+        # cv2.line(back_plt_no_NMS,(x_line[s-1], size_plt-y_line[s-1]),(x_line[s],size_plt-y_line[s]),color,5 )
 
-        x_line.append(int(size/(size/step_pix) *s ))
-        y_line.append(int(size_c/100))
-        color = (0,0,0)
-        # c_color = (0,0,0)
-        if y_line[s]>50:
-            color = (0,0,255)
-            # c_color = []
-        
-        cv2.line(back_plt,(x_line[s-1], size_plt-y_line[s-1]),(x_line[s],size_plt-y_line[s]),color,3 )
+        size_c = cw * ch
+        IOU = size_c / min(size_a, size_b)
+        IOU2 = size_c / (size_a + size_b - size_c)
+        print(IOU, IOU2)
+        # x.append(s)
+        # y.append(IOU*10)
 
-        cv2.putText(back_plt,'IOU',(0,50),cv2.FONT_HERSHEY_PLAIN,2,color,1)
-        back[slice(size - size_plt, size), slice(0, int(size * 5 / 12))] = back_plt[:, slice(0, int(size * 5 / 12))]
+        x_line.append(step_pix * s)
+        y_line.append(int(IOU*size_plt*0.7))
+        y_line2.append(int(IOU2*size_plt*0.7))
+
+        color = (0, 0, 0)
+        color_no_NMS = (0, 0, 0)
+        # if y_line[s] > 50:
+
+        if IOU >= 0.5:
+            color = (0, 0, 255)
+        if IOU2 >= 0.5:
+            color_no_NMS = (0, 0, 255)
+
+        cv2.line(back_plt, (x_line[s - 1], size_plt - y_line[s - 1]), (x_line[s], size_plt - y_line[s]), color, 5)
+        cv2.line(back_plt_no_NMS, (x_line[s - 1], size_plt - y_line2[s - 1]), (x_line[s], size_plt - y_line2[s]), color_no_NMS,5)
+
+        nms_line = np.append(back_plt[:,slice(0,int(size/2))],back_plt_no_NMS[:,slice(0,int(size/2))],axis=1)
+        # back.shape[::-1], nms_line.shape[::-1]
+        write(nms_line,'m_'+str(s))
+
+        cv2.putText(back_plt,'IOU_WITH_NMS',     (0,50),cv2.FONT_HERSHEY_PLAIN,3,color,2)
+        cv2.putText(back_plt_no_NMS,'IOU_NO_NMS',(0,50),cv2.FONT_HERSHEY_PLAIN,3,color,2)
+        # back[slice(size - size_plt, size), slice(0, int(size * 5 / 12))] = back_plt[:, slice(0, int(size * 5 / 12))]
+
+        back = np.append(back,nms_line,axis=0)
+
         pil_im = Image.fromarray(back)
-        font = ImageFont.truetype("/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc", 20, encoding="utf-8")
+        font = ImageFont.truetype("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc", 50, encoding="utf-8")
+        # font = ImageFont.truetype("simhei.ttf", 20, encoding="utf-8")
         draw = ImageDraw.Draw(pil_im)
-        draw.text((0, int(size*2/3+30)), "红色区域：触发ＮＭＳ", (0, 0, 255), font=font)
+        draw.text((0, size-100), "红色区域：触发ＮＭＳ", (0, 0, 255), font=font)
         back = np.array(pil_im)
 
         if ch>0 and cw > 0:
@@ -96,32 +132,32 @@ def Box():
                                   (new_ax, new_ay),
                                   (new_ax + aw, new_ay + ah),
                                   (255, 0, 0), 2)
-            cv2.putText(back, 'A', (new_ax, new_ay), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 1)
+            cv2.putText(back, 'A', (new_ax, new_ay), cv2.FONT_HERSHEY_PLAIN, 6, (255, 0, 0), 2)
 
             box_B = cv2.rectangle(back,
                                   (new_bx, new_by),
                                   (new_bx + bw, new_by + bh),
                                   (0, 255, 0), 2)
-            cv2.putText(back, 'B', (new_bx, new_by), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 1)
+            cv2.putText(back, 'B', (new_bx, new_by), cv2.FONT_HERSHEY_PLAIN, 6, (0, 255, 0), 2)
 
             c_color = [0,0,0]
-            if y_line[s] > 50:
+            if IOU>0.5:
                 c_color = [0,0,255]
             back[slice(cy,cy+ch),slice(cx,cx+cw)] = c_color
-            cv2.putText(back, 'C', (cx+int(cw/2), cy+int(ch/2)), cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
+            cv2.putText(back, 'C', (cx+int(cw/2), cy+int(ch/2)), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
 
         else:
             box_A = cv2.rectangle(back,
                                   (new_ax, new_ay),
                                   (new_ax + aw, new_ay + ah),
                                   (255, 0, 0), 2)
-            cv2.putText(back, 'A', (new_ax, new_ay), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 1)
+            cv2.putText(back, 'A', (new_ax, new_ay), cv2.FONT_HERSHEY_PLAIN, 6, (255, 0, 0), 2)
 
             box_B = cv2.rectangle(back,
                                   (new_bx, new_by),
                                   (new_bx + bw, new_by + bh),
                                   (0, 255, 0), 2)
-            cv2.putText(back, 'B', (new_bx, new_by), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 1)
+            cv2.putText(back, 'B', (new_bx, new_by), cv2.FONT_HERSHEY_PLAIN, 6, (0, 255, 0), 2)
             # write(back, 1)
 
         write(back_plt, 4)
